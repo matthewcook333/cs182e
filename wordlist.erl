@@ -1,6 +1,8 @@
 -module(wordlist).
 -export([load/1, distance/3, correct/2, suggestions/2, main/1]).
 
+-define(THRESHOLD, 1).
+
 % load/1
 % input: path to dictionary file.
 % output: a list containing the word in the dictionary file.
@@ -28,19 +30,22 @@ load(Device, Dict) ->
 % output: a distance between x and y up to threshold t.
 % details:  if the distance is greater than t, this function
 %  returns some integer greater than t.
-distance(x, y, t) ->
+distance(X, Y, T) ->
 
 % correct/2
 % input: word w and list of words L.
 % output: true if w appears in L and false otherwise.
-correct(w, L) -> lists:member(w, L).
+correct(W, L) -> lists:member(W, L).
 
 % suggestions/2
 % input: word w and list of words L.
 % output: a list containing all the suggested spellings for w that appear
 %  in L in alphabetical order.
 % details:  if there are no suggested spellings for w, returns empty list
-suggestions(w, L) ->
+suggestions(W, L) ->
+	[Similar] = lists:filter(
+		fun(X) -> distance(X, w, THRESHOLD) =< THRESHOLD end, L),
+	Similar.
 
 % main/1
 % input: a list with only one element which is the pathname of dictionary
