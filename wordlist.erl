@@ -7,7 +7,21 @@
 % details:  if error occurs in opening file or reading input, 
 %  the resulting list is empty. Assumes the dictionary file 
 %  describes one word per line.
-load(Pathname) ->
+% reference: http://stackoverflow.com/questions/
+%  10295557/erlang-reading-integers-from-file
+load(Device) ->
+	load(Device, []).
+
+load(Device, Dict) -> 
+	case io:fread(Device, [], "~s") of
+		eof ->
+			lists:sort(Dict);
+		{ok, [S]} ->
+			load(Device, [S | Dict]);
+		{error, What} ->
+			io:format("io:fread error: ~w~n", [What]),
+			load(Device, Dict)
+	end.
 	
 % distance/3
 % input: word x, word y, and integer threshold t.
@@ -35,4 +49,6 @@ suggestions(w, L) ->
 % details:  this allows the user to repeatedly enter words (one per line) 
 %  until the EOF character (Control-D) is entered.
 main(Pathname) ->
+	{ok, Device} = file:open(Pathname, [read]),
+	load(Device).
 
