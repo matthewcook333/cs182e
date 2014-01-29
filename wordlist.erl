@@ -30,7 +30,13 @@ load(Device, Dict) ->
 % output: a distance between x and y up to threshold t.
 % details:  if the distance is greater than t, this function
 %  returns some integer greater than t.
-distance(X, Y, T) ->
+distance(X, Y, T) -> distance(X, Y, T, 0).
+
+distance( [], [], _, Acc) -> Acc.
+distance(_, _, T, Acc) when Acc > T -> Acc. 
+distance([CharX | X], [CharY | Y], T, Acc) when CharX == CharY ->
+	distance(X, Y, T, Acc). 
+distance()
 
 % correct/2
 % input: word w and list of words L.
@@ -44,7 +50,7 @@ correct(W, L) -> lists:member(W, L).
 % details:  if there are no suggested spellings for w, returns empty list
 suggestions(W, L) ->
 	[Similar] = lists:filter(
-		fun(X) -> distance(X, w, THRESHOLD) =< THRESHOLD end, L),
+		fun(X) -> distance(X, W, THRESHOLD) =< THRESHOLD end, L),
 	Similar.
 
 % main/1
