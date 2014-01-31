@@ -33,8 +33,7 @@ load(Device, Dict) ->
 % output: a distance between x and y up to threshold t.
 % details:  if the distance is greater than t, this function
 %  returns some integer greater than t.
-distance(X, Y, T) -> distance(
-	atom_to_list(X), atom_to_list(Y), T, 0).
+distance(X, Y, T) -> distance(X, Y, T, 0).
 
 % private helper function: distance/4
 % details: distance/3 with the additional
@@ -64,7 +63,7 @@ correct(W, L) -> lists:member(W, L).
 %  in L in alphabetical order.
 % details:  if there are no suggested spellings for w, returns empty list
 suggestions(W, L) ->
-	[Similar] = lists:filter(
+	Similar = lists:filter(
 		fun(X) -> distance(X, W, ?THRESHOLD) =< ?THRESHOLD end, L),
 	Similar.
 
@@ -76,5 +75,14 @@ suggestions(W, L) ->
 %  until the EOF character (Control-D) is entered.
 main(Pathname) ->
 	{ok, Device} = file:open(Pathname, [read]),
-	load(Device).
+	Dict = lists:filter(
+		fun(X) -> string:len(X) > 0 end, load(Device)),
+	io:format("~p~n", [Dict]),
+	loop(Dict).
+
+loop(Dict) ->
+	{ok, [X]} = io:fread("input : ", "~s"),
+	io:format("~p~n", [correct(X, Dict)]),
+	io:format("~p~n", [suggestions(X, Dict)]),
+	loop(Dict).
 
