@@ -14,6 +14,9 @@
 load(Device) ->
 	load(Device, []).
 
+% private helper function: load/2
+% details: load/1 with the additional
+%  Dict creating the dictionary
 load(Device, Dict) -> 
 	case io:fread(Device, [], "~s") of
 		eof ->
@@ -30,13 +33,25 @@ load(Device, Dict) ->
 % output: a distance between x and y up to threshold t.
 % details:  if the distance is greater than t, this function
 %  returns some integer greater than t.
-distance(X, Y, T) -> distance(X, Y, T, 0).
+distance(X, Y, T) -> distance(
+	atom_to_list(X), atom_to_list(Y), T, 0).
 
-distance( [], [], _, Acc) -> Acc.
-distance(_, _, T, Acc) when Acc > T -> Acc. 
-distance([CharX | X], [CharY | Y], T, Acc) when CharX == CharY ->
-	distance(X, Y, T, Acc). 
-distance()
+% private helper function: distance/4
+% details: distance/3 with the additional
+%  Acc for tail-recursion
+distance([], Y, _, Acc) -> Acc + length(Y);
+distance(X, [], _, Acc) -> Acc + length(X);
+distance(_, _, T, Acc) when Acc > T -> Acc;
+distance([CharX | X], [CharY | Y], T, Acc) ->
+	if CharX == CharY ->
+		distance(X, Y, T, Acc)
+	 ; CharX /= CharY ->
+		min(min(
+			distance(X, Y, T, Acc + 1),
+			distance([CharX|X], Y, T, Acc + 1)),
+			distance(X, [CharY|Y], T, Acc + 1))
+	end.
+
 
 % correct/2
 % input: word w and list of words L.
@@ -50,7 +65,7 @@ correct(W, L) -> lists:member(W, L).
 % details:  if there are no suggested spellings for w, returns empty list
 suggestions(W, L) ->
 	[Similar] = lists:filter(
-		fun(X) -> distance(X, W, THRESHOLD) =< THRESHOLD end, L),
+		fun(X) -> distance(X, W, ?THRESHOLD) =< ?THRESHOLD end, L),
 	Similar.
 
 % main/1
